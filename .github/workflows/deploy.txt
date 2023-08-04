@@ -1,0 +1,39 @@
+name: Deploy
+
+on:
+    push:
+        branches: [ master ]
+    pull_request:
+        branches: [ master ]
+
+jobs:
+    build:
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v1
+
+            - name: SCP FOLDER
+              uses: appleboy/scp-action@master
+              env:
+                  HOST: ${{ secrets.IP }}
+                  USERNAME: ${{ secrets.USERNAME }}
+                  PORT: ${{ secrets.PORT }}
+                  PASSWORD: ${{ secrets.PASSWORD }}
+              with:
+                  source: "."
+                  target: "/var/www/khodoan/seri-api-food"
+
+            - name: Deploy
+              uses: appleboy/ssh-action@master
+              with:
+                  HOST: ${{ secrets.IP }}
+                  USERNAME: ${{ secrets.USERNAME }}
+                  PORT: ${{ secrets.PORT }}
+                  PASSWORD: ${{ secrets.PASSWORD }}
+                  script: |
+                      cd /var/www/khodoan/seri-api-food
+                      git pull origin master
+                      composer install
+#                      sudo chmod -R 777 storage/
